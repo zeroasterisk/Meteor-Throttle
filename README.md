@@ -24,15 +24,15 @@ On Throttle Methods
 ------------------------
 
 * `checkThenSet(key, allowedCount, expireInSec)` checks a key, if passes it then sets the key for future checks
-  `check(key, allowedCount)` checks a key, if less than `allowedCount` of the (unexpired) records exist, it passes
-  `set(key, expireInSec)` sets a record for key, and it will expire after `expireInSec` seconds, eg: `60` = 1 min in the future
-  `purge()` expires all records which are no longer within timeframe (automatically called on every check)
+* `check(key, allowedCount)` checks a key, if less than `allowedCount` of the (unexpired) records exist, it passes
+* `set(key, expireInSec)` sets a record for key, and it will expire after `expireInSec` seconds, eg: `60` = 1 min in the future
+* `purge()` expires all records which are no longer within timeframe (automatically called on every check)
 
 
 Methods Methods (call-able)
 ------------------------
 
 * `throttle(key, allowedCount, expireInSec)` --> `Throttle.checkThenSet()`
-  `throttle-check(key, allowedCount)` --> `Throttle.check()`
-  `throttle-set(key, expireInSec)` --> `Throttle.set()`
+* `throttle-check(key, allowedCount)` --> `Throttle.check()`
+* `throttle-set(key, expireInSec)` --> `Throttle.set()`
 
