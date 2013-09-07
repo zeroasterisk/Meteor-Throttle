@@ -1,0 +1,10 @@
+{
+  "name": "throttle",
+  "description": "Throttle is a very simple server-side throttling system",
+  "homepage": "https://github.com/zeroasterisk/Meteor-Throttle",
+  "author": "Alan Blount (http://zeroasterisk.com)",
+  "version": "0.0.2",
+  "git": "https://github.com/zeroasterisk/Meteor-Throttle.git",
+  "packages": {
+  }
+}
