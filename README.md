@@ -23,13 +23,13 @@ You can easily use the built in methods for throttle checking from the
 Client... but to keep Throttling secure we only run it on the server...
 therefore you must use the `Meteor.call()` function...
 
-   Meteor.call('throttle', 'mykey', 1, 3000, function(error, result) {
-    if (!result) {
-      console.error('Not Allowed past Throttle check');
-      return;
-    }
-    console.log('Allowed past Throttle check');
-   });
+    Meteor.call('throttle', 'mykey', 1, 3000, function(error, result) {
+      if (!result) {
+        console.error('Not Allowed past Throttle check');
+        return;
+      }
+      console.log('Allowed past Throttle check');
+    });
 
 
 Usage On Server (direct)
