@@ -8,11 +8,11 @@ Throttle = new Meteor.Collection('throttles');
 
 // check to see if we've done something too many times
 // if we "pass" then go ahead and set... (shortcut)
-Throttle.checkThenSet = function(key, allowed, expireInSec) {
+Throttle.checkThenSet = function(key, allowed, expireInMS) {
   if (!this.check(key, allowed)) {
     return false;
   }
-  return this.set(key, expireInSec)
+  return this.set(key, expireInMS)
 };
 
 // check to see if we've done something too many times
@@ -26,12 +26,12 @@ Throttle.check = function(key, allowed) {
 }
 
 // create a record with
-Throttle.set = function(key, expireInSec) {
-  if (!_.isNumber(expireInSec)) {
-    expireInSec = 1800; // 30 min
+Throttle.set = function(key, expireInMS) {
+  if (!_.isNumber(expireInMS)) {
+    expireInMS = 180000; // 3 min, default expire timestamp
   }
-  var expireEpoch = this.epoch() + expireInSec;
-  console.log('Throttle.set(', key, expireInSec, ')');
+  var expireEpoch = this.epoch() + expireInMS;
+  console.log('Throttle.set(', key, expireInMS, ')');
   this.insert({
     key: key,
     expire: expireEpoch
@@ -52,11 +52,11 @@ Throttle.epoch = function() {
 
 // expose some methods for easy access into Throttle from the client
 Meteor.methods({
-  'throttle': function(key, allowed, expireInSec) {
-    return Throttle.checkThenSet(key, allowed, expireInSec);
+  'throttle': function(key, allowed, expireInMS) {
+    return Throttle.checkThenSet(key, allowed, expireInMS);
   },
-  'throttle-set': function(key, expireInSec) {
-    return Throttle.set(key, expireInSec);
+  'throttle-set': function(key, expireInMS) {
+    return Throttle.set(key, expireInMS);
   },
   'throttle-check': function(key, allowed) {
     return Throttle.check(key, allowed);
