@@ -1,5 +1,5 @@
 Package.describe({
-  summary: "\u001b[32mv0.0.3\n"+
+  summary: "\u001b[32mv0.1.0\n"+
   "\u001b[33m-----------------------------------------\n"+
   "\u001b[0m Throttle is a simple means of limiting   \n"+
   "\u001b[0m Serverside interactions (emails, etc)    \n"+
