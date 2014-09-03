@@ -1,17 +1,21 @@
+
 Package.describe({
-  summary: "\u001b[32mv0.1.0\n"+
-  "\u001b[33m-----------------------------------------\n"+
-  "\u001b[0m Throttle is a simple means of limiting   \n"+
-  "\u001b[0m Serverside interactions (emails, etc)    \n"+
-  "\u001b[33m-----------------------------zeroasterisk\n"
+  name: "zeroasterisk:throttle",
+  summary: "A secure means of limiting interactions (emails, etc)",
+  version: "0.2.1",
+  git: "https://github.com/zeroasterisk/Meteor-Throttle.git"
 });
 
-Package.on_use(function (api, where) {
+Package.onUse(function (api) {
+  api.versionsFrom("0.9.0");
   api.use(['meteor', 'underscore'], 'server');
-  api.add_files('throttle.js', ['server']);
+  // Export the object 'Throttle' to packages or apps that use this package.
+  api.export('Throttle', 'server');
+  api.addFiles('throttle.js', ['server']);
 });
 
-Package.on_test(function (api) {
-  api.use('throttle');
-  api.add_files('throttle_tests.js', ['client', 'server']);
+Package.onTest(function (api) {
+  api.use("zeroasterisk:throttle");
+  api.use('tinytest@1.0.0');
+  api.addFiles('throttle_tests.js', ['client', 'server']);
 });
