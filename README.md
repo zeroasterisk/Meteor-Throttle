@@ -19,6 +19,10 @@ https://github.com/zeroasterisk/Meteor-Throttle-Example
 Usage On Client (Meteor.call)
 ------------------------
 
+Install the package from [Atmosphere](https://atmospherejs.com/zeroasterisk/throttle):
+
+    meteor add zeroasterisk:throttle
+
 You can easily use the built in methods for throttle checking from the
 Client... but to keep Throttling secure we only run it on the server...
 therefore you must use the `Meteor.call()` function...
