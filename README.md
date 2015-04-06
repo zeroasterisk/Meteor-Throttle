@@ -15,13 +15,21 @@ http://throttle-example.meteor.com
 
 https://github.com/zeroasterisk/Meteor-Throttle-Example
 
+Install
+------------------------
+
+Simple package [Atmosphere Package](https://atmospherejs.com/zeroasterisk/throttle) install is all you need:
+
+    meteor add zeroasterisk:throttle
+
+Optionally add an [Accounts Throttling](https://atmospherejs.com/zeroasterisk/throttle-accounts) "extra" if you want:
+
+    meteor add zeroasterisk:throttle-accounts
+
+*(NOTE for Throttle Accounts, you have to Configure it, see that package's README)*
 
 Usage On Client (Meteor.call)
 ------------------------
-
-Install the package from [Atmosphere](https://atmospherejs.com/zeroasterisk/throttle):
-
-    meteor add zeroasterisk:throttle
 
 You can easily use the built in methods for throttle checking from the
 Client... but to keep Throttling secure we only run it on the server...
@@ -35,6 +43,7 @@ therefore you must use the `Meteor.call()` function...
       console.log('Allowed past Throttle check');
     });
 
+*NOTE that the key (`mykey` in the above example) is insecure on the client... a user could modify their method call to use a different key and bypass Throttling.  If you want **real** security, do all of your throttling on the server, and custom methods to call.*
 
 Usage On Server (direct)
 ------------------------
@@ -45,6 +54,11 @@ and over again, even if a user triggered it.
     // on server
     if (!Throttle.checkThenSet(key, allowedCount, expireInMS)) {
       throw new Meteor.Error(500, 'You may only send ' + allowedCount + ' emails at a time, wait a while and try again');
+    }
+    // Secure per-user Throttling available on the server - since we can trust the userId()
+    key = key + 'userId' + Meteor.userId();
+    if (!Throttle.checkThenSet(key, allowedCount, expireInMS)) {
+      throw new Meteor.Error(500, 'Nope - not allowed - try again in a few minutes');
     }
     ....
 
