@@ -6,6 +6,7 @@
 if (Meteor.isServer) {
 
   Throttle = new Meteor.Collection('throttles');
+  Throttle._ensureIndex({key: 1});
   Throttle.debug = true;
 
   // check to see if we've done something too many times
