@@ -11,9 +11,10 @@ and the set a record that we did.
 Example Meteor Application
 ------------------------
 
-http://throttle-example.meteor.com
-
-https://github.com/zeroasterisk/Meteor-Throttle-Example
+* https://github.com/zeroasterisk/Meteor-Throttle-Example
+ * http://throttle-example.meteor.com
+* https://github.com/zeroasterisk/Meteor-Throttle-Accounts
+ * (see above Example Meteor application, includes Throttle Accounts)
 
 Install
 ------------------------
@@ -70,6 +71,7 @@ Functions On the Throttle Collection (server only)
 * `check(key, allowedCount)` checks a key, if less than `allowedCount` of the (unexpired) records exist, it passes
 * `set(key, expireInMS)` sets a record for key, and it will expire after `expireInMS` milliseconds, eg: `60000` = 1 min in the future
 * `purge()` expires all records which are no longer within timeframe (automatically called on every check)
+* `setDebugMode(bool)` true/false logs details [false by default]
 
 
 Methods Methods (call-able)

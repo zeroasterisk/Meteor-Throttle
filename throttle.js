@@ -2,12 +2,56 @@
  * Throttle A tool for limiting repeated calls to anything on the server
  * (the choice was made not to allow this on the client, so it's actually secure)
  *
+ *
+ * Configuration on the Server
+ *
+ *
+ * Throttle.setDebugMode(true/false)
+ * Throttle.setScope("user") or "global" [default=global]
  */
 if (Meteor.isServer) {
 
   Throttle = new Meteor.Collection('throttles');
   Throttle._ensureIndex({key: 1});
-  Throttle.debug = true;
+  Throttle.debug = false;
+  // scope: normal, user
+  //   if set to "user" all keys will become user specific not global
+  //   (on server, based on Meteor.userId())
+  Throttle.scope = 'normal';
+
+  // Access to set the Throttle.debug Boolean
+  Throttle.setDebugMode = function(bool) {
+    check(bool, Boolean);
+    this.debug = bool;
+    if (this.debug) {
+      console.log('Throttle.setDebugMode(' + bool + ')');
+    }
+  }
+
+  // Access to set the Throttle.debug Boolean
+  Throttle.setScope = function(scope) {
+    check(scope, String);
+    this.scope = scope;
+    if (this.debug) {
+      console.log('Throttle.setScope(' + scope + ')');
+    }
+  }
+
+  // Modify the key based on Throttle.scope
+  Throttle.keyScope = function(key) {
+    check(key, String);
+    if (this.scope == 'user') {
+      // we want to append the userId to the key,
+      //   so that our Throttling is limited in scope to Meteor.userId()
+      //   (accross multiple sessions)
+      // if not authenticated, global scope is applied
+      var userId = Meteor.userId();
+      if (userId) {
+        key = key + '_u_' + Meteor.userId();
+      }
+    }
+    return key;
+  }
 
   // check to see if we've done something too many times
   // if we "pass" then go ahead and set... (shortcut)
@@ -21,6 +65,7 @@ if (Meteor.isServer) {
   // check to see if we've done something too many times
   Throttle.check = function(key, allowed) {
     Throttle.purge();
+    key = Throttle.keyScope(key);
     if (!_.isNumber(allowed)) {
       allowed = 1;
     }
@@ -32,6 +77,7 @@ if (Meteor.isServer) {
 
   // create a record with
   Throttle.set = function(key, expireInMS) {
+    key = Throttle.keyScope(key);
     if (!_.isNumber(expireInMS)) {
       expireInMS = 180000; // 3 min, default expire timestamp
     }
@@ -76,8 +122,7 @@ if (Meteor.isServer) {
       return Throttle.check(key, allowed);
     },
     'throttle-debug': function(bool) {
-      check(bool, Boolean);
-      return Throttle.debug = bool;
+      return Throttle.setDebugMode(bool);
     },
   });
 
