@@ -11,13 +11,32 @@
  */
 if (Meteor.isServer) {
 
-  Throttle = new Meteor.Collection('throttles');
-  Throttle._ensureIndex({key: 1});
+  Throttle = {};
+
+  // have we run setup yet?
+  Throttle.isSetup = false;
+  // collection mode (true for multi-app server setup)
+  Throttle.isCollectionMongo = false;
+  // debug mode
   Throttle.debug = false;
   // scope: normal, user
   //   if set to "user" all keys will become user specific not global
   //   (on server, based on Meteor.userId())
   Throttle.scope = 'normal';
+
+  // Access to set the Throttle.debug Boolean
+  Throttle.setup = function() {
+    if (this.isSetup) {
+      return;
+    }
+    this.isSetup = true;
+    if (this.isCollectionMongo) {
+      this._collection = new Meteor.Collection('throttles');
+      this._collection._ensureIndex({key: 1});
+    } else {
+      this._collection = new Meteor.Collection(null);
+    }
+  }
 
   // Access to set the Throttle.debug Boolean
   Throttle.setDebugMode = function(bool) {
@@ -64,6 +83,7 @@ if (Meteor.isServer) {
 
   // check to see if we've done something too many times
   Throttle.check = function(key, allowed) {
+    this.setup();
     Throttle.purge();
     key = Throttle.keyScope(key);
     if (!_.isNumber(allowed)) {
@@ -72,11 +92,12 @@ if (Meteor.isServer) {
     if (Throttle.debug) {
       console.log('Throttle.check(', key, allowed, ')');
     }
-    return (this.find({ key: key }).count() < allowed);
+    return (this._collection.find({ key: key }).count() < allowed);
   }
 
   // create a record with
   Throttle.set = function(key, expireInMS) {
+    this.setup();
     key = Throttle.keyScope(key);
     if (!_.isNumber(expireInMS)) {
       expireInMS = 180000; // 3 min, default expire timestamp
@@ -85,7 +106,7 @@ if (Meteor.isServer) {
     if (Throttle.debug) {
       console.log('Throttle.set(', key, expireInMS, ')');
     }
-    this.insert({
+    this._collection.insert({
       key: key,
       expire: expireEpoch
     });
@@ -94,7 +115,8 @@ if (Meteor.isServer) {
 
   // remove expired records
   Throttle.purge = function() {
-    this.remove({ expire: {$lt: this.epoch() } });
+    this.setup();
+    this._collection.remove({ expire: {$lt: this.epoch() } });
   };
 
   // simple tool to get a standardized epoch/timestamp

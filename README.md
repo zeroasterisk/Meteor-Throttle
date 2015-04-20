@@ -31,9 +31,19 @@ Optionally add an [Accounts Throttling](https://atmospherejs.com/zeroasterisk/th
 ## Configuration
 
     if (Meteor.isServer) {
+
       // core Throttle config
-      Throttle.setDebugMode(true); // default = false
-      Throttle.setScope("user");   // default = global
+      // ----------------------------
+
+      // Use a MongoDB collection (slower, but can sync to multiple app servers)
+      Throttle.isCollectionMongo = true; // default = false
+
+      // Set the "scope" to "user specific" so every key gets appended w/ userId
+      Throttle.setScope("user");    // default = global
+
+      // Show debug messages in the server console.log()
+      Throttle.setDebugMode(true);  // default = false
+
     }
 
 ## Usage On Client (Meteor.call)
