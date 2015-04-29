@@ -30,6 +30,7 @@ Optionally add an [Accounts Throttling](https://atmospherejs.com/zeroasterisk/th
 
 ## Configuration
 
+```js
     if (Meteor.isServer) {
 
       // core Throttle config
@@ -44,7 +45,10 @@ Optionally add an [Accounts Throttling](https://atmospherejs.com/zeroasterisk/th
       // Show debug messages in the server console.log()
       Throttle.setDebugMode(true);  // default = false
 
+      // Disable client-side methods
+      Throttle.noMethods = true;    // default = false
     }
+```
 
 ## Usage On Client (Meteor.call)
 
@@ -95,6 +99,14 @@ and over again, even if a user triggered it.
 * `throttle-check(key, allowedCount)` --> `Throttle.check()`
 * `throttle-set(key, expireInMS)` --> `Throttle.set()`
 * `throttle-debug(bool)` --> pass in true/false to toggle server loggin on checks
+
+If you don't planning to use methods, better if you disable it:
+
+```js
+if (Meteor.isServer) {
+  Throttle.noMethods = true;
+}
+```
 
 *(no set-scope method, because that would be insecure)*
 

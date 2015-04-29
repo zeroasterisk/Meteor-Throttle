@@ -24,6 +24,9 @@ if (Meteor.isServer) {
   //   (on server, based on Meteor.userId())
   Throttle.scope = 'normal';
 
+  // disable exposing methods
+  Throttle.noMethods = false;
+
   // Access to set the Throttle.debug Boolean
   Throttle.setup = function() {
     if (this.isSetup) {
@@ -125,25 +128,35 @@ if (Meteor.isServer) {
     return now.getTime();
   }
 
+  // Rise exception if disabled client-side methods
+  var checkAllowedMethods = function()  {
+    if (Throttle.noMethods)
+      throw new Meteor.Error(403, 'Client-side throttle disabled');
+  };
+
   // expose some methods for easy access into Throttle from the client
   Meteor.methods({
     'throttle': function(key, allowed, expireInMS) {
+      checkAllowedMethods();
       check(key, String);
       check(allowed, Match.Integer);
       check(expireInMS, Match.Integer);
       return Throttle.checkThenSet(key, allowed, expireInMS);
     },
     'throttle-set': function(key, expireInMS) {
+      checkAllowedMethods();
       check(key, String);
       check(expireInMS, Match.Integer);
       return Throttle.set(key, expireInMS);
     },
     'throttle-check': function(key, allowed) {
+      checkAllowedMethods();
       check(key, String);
       check(allowed, Match.Integer);
       return Throttle.check(key, allowed);
     },
     'throttle-debug': function(bool) {
+      checkAllowedMethods();
       return Throttle.setDebugMode(bool);
     },
   });
