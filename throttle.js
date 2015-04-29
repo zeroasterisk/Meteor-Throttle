@@ -15,17 +15,16 @@ if (Meteor.isServer) {
 
   // have we run setup yet?
   Throttle.isSetup = false;
-  // collection mode (true for multi-app server setup)
-  Throttle.isCollectionMongo = false;
+  // collection name (null for single-node-app, RAM only, no MongoDB)
+  Throttle._collectionName = 'throttles';
   // debug mode
   Throttle.debug = false;
   // scope: normal, user
   //   if set to "user" all keys will become user specific not global
   //   (on server, based on Meteor.userId())
   Throttle.scope = 'normal';
-
-  // disable exposing methods
-  Throttle.noMethods = false;
+  // enable "helper" clientside methods
+  Throttle.isMethodhelpersAllowed = true;
 
   // Access to set the Throttle.debug Boolean
   Throttle.setup = function() {
@@ -33,12 +32,29 @@ if (Meteor.isServer) {
       return;
     }
     this.isSetup = true;
-    if (this.isCollectionMongo) {
-      this._collection = new Meteor.Collection('throttles');
+    if (this._collectionName) {
+      this._collection = new Meteor.Collection(this._collectionName);
       this._collection._ensureIndex({key: 1});
     } else {
       this._collection = new Meteor.Collection(null);
     }
+  };
+
+  // clear existing setup (allowing for changing _collectionName)
+  Throttle.resetSetup = function() {
+    this.isSetup = false;
+  }
+
+  // Access to set the Throttle._collectionName string
+  //   see setup()
+  Throttle.setCollection = function(name) {
+    check(name, Match.OneOf(String, null));
+    this._collectionName = name;
+    if (this.debug) {
+      console.log('Throttle.setCollection(' + name + ')');
+    }
+    // reset setup() just in case it's already been called
+    this.resetSetup();
   }
 
   // Access to set the Throttle.debug Boolean
@@ -51,11 +67,22 @@ if (Meteor.isServer) {
   }
 
   // Access to set the Throttle.debug Boolean
+  //   see keyScope()
   Throttle.setScope = function(scope) {
     check(scope, String);
     this.scope = scope;
     if (this.debug) {
       console.log('Throttle.setScope(' + scope + ')');
+    }
+  }
+
+  // Access to set the Throttle.isMethodhelpersAllowed Boolean
+  //   see checkAllowedMethods()
+  Throttle.setMethodsAllowed = function(bool) {
+    check(bool, Boolean);
+    this.isMethodhelpersAllowed = bool;
+    if (this.debug) {
+      console.log('Throttle.setMethodsAllowed(' + bool + ')');
     }
   }
 
@@ -85,6 +112,7 @@ if (Meteor.isServer) {
   };
 
   // check to see if we've done something too many times
+  //   if more than allowed = false
   Throttle.check = function(key, allowed) {
     this.setup();
     Throttle.purge();
@@ -129,34 +157,37 @@ if (Meteor.isServer) {
   }
 
   // Rise exception if disabled client-side methods
-  var checkAllowedMethods = function()  {
-    if (Throttle.noMethods)
-      throw new Meteor.Error(403, 'Client-side throttle disabled');
+  //   see setMethodsAllowed()
+  Throttle.checkAllowedMethods = function()  {
+    if (Throttle.isMethodhelpersAllowed) {
+      return true;
+    }
+    throw new Meteor.Error(403, 'Client-side throttle disabled');
   };
 
   // expose some methods for easy access into Throttle from the client
   Meteor.methods({
     'throttle': function(key, allowed, expireInMS) {
-      checkAllowedMethods();
+      Throttle.checkAllowedMethods();
       check(key, String);
       check(allowed, Match.Integer);
       check(expireInMS, Match.Integer);
       return Throttle.checkThenSet(key, allowed, expireInMS);
     },
     'throttle-set': function(key, expireInMS) {
-      checkAllowedMethods();
+      Throttle.checkAllowedMethods();
       check(key, String);
       check(expireInMS, Match.Integer);
       return Throttle.set(key, expireInMS);
     },
     'throttle-check': function(key, allowed) {
-      checkAllowedMethods();
+      Throttle.checkAllowedMethods();
       check(key, String);
       check(allowed, Match.Integer);
       return Throttle.check(key, allowed);
     },
     'throttle-debug': function(bool) {
-      checkAllowedMethods();
+      Throttle.checkAllowedMethods();
       return Throttle.setDebugMode(bool);
     },
   });
