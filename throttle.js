@@ -35,6 +35,7 @@ if (Meteor.isServer) {
     if (this._collectionName) {
       this._collection = new Meteor.Collection(this._collectionName);
       this._collection._ensureIndex({key: 1});
+      this._collection._ensureIndex({expire: 1});
     } else {
       this._collection = new Meteor.Collection(null);
     }
