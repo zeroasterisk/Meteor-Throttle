@@ -30,16 +30,32 @@ Optionally add an [Accounts Throttling](https://atmospherejs.com/zeroasterisk/th
 
 ## Configuration
 
+This is optional Configuration - if you want to change how Throttle operates.
+
 ```js
     if (Meteor.isServer) {
+
       // core Throttle config
-      Throttle.setDebugMode(true); // default = false
-      Throttle.setScope("user");   // default = global
-      Throttle.noMethods = true;   // Disable client-side methods, default = false
+      // ----------------------------
+
+      // Set a MongoDB collection name
+      //   (for a single-node app it is faster to set to null, no MongoDB, but RAM only)
+      Throttle.setCollection(null);       // default = 'throttles'
+
+      // Set the "scope" to "user specific" so every key gets appended w/ userId
+      Throttle.setScope("user");          // default = global
+
+      // Show debug messages in the server console.log()
+      Throttle.setDebugMode(true);        // default = false
+
+      // Disable client-side methods (event more secure)
+      Throttle.setMethodsAllowed(false);  // default = true
     }
 ```
 
 ## Usage On Client (Meteor.call)
+
+NOTE: These will not work if you have set: `Throttle.setMethodsAllowed(false);`
 
 You can easily use the built in methods for throttle checking from the
 Client... but to keep Throttling secure we only run it on the server...
@@ -78,8 +94,11 @@ and over again, even if a user triggered it.
 * `check(key, allowedCount)` checks a key, if less than `allowedCount` of the (unexpired) records exist, it passes
 * `set(key, expireInMS)` sets a record for key, and it will expire after `expireInMS` milliseconds, eg: `60000` = 1 min in the future
 * `purge()` expires all records which are no longer within timeframe (automatically called on every check)
-* `setDebugMode(bool)` true/false logs details [false by default]
+* `setCollection(mixed)` null for no MongoDB, string for MongoDB collection name ['throttles' by default]
 * `setScope(bool)` true/false logs details [false by default]
+* `setMethodsAllowed(bool)` true/false allows clientside helper methods [true by default]
+* `setDebugMode(bool)` true/false logs details [false by default]
+* `resetSetup()` re-setup the Collection, if needed (automatic if `setCollection()` is used)
 
 
 ## Methods Methods (call-able)
@@ -93,7 +112,7 @@ If you don't planning to use methods, better if you disable it:
 
 ```js
 if (Meteor.isServer) {
-  Throttle.noMethods = true;
+  Throttle.setMethodsAllowed(false);
 }
 ```
 
