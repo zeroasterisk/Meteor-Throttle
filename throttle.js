@@ -13,10 +13,11 @@ if (Meteor.isServer) {
 
   Throttle = {};
 
-  // have we run setup yet?
-  Throttle.isSetup = false;
+  // CONFIG
   // collection name (null for single-node-app, RAM only, no MongoDB)
   Throttle._collectionName = 'throttles';
+  // collection options
+  Throttle._collectionOptions = {};
   // debug mode
   Throttle.debug = false;
   // scope: normal, user
@@ -25,38 +26,80 @@ if (Meteor.isServer) {
   Throttle.scope = 'normal';
   // enable "helper" clientside methods
   Throttle.isMethodhelpersAllowed = true;
+  // PLACEHOLDERS
+  // collection object placeholder
+  Throttle._collection = null;
+  // have we run setup yet?
+  Throttle.isSetup = false;
 
-  // Access to set the Throttle.debug Boolean
+  // Setup the Throttle Collection (or re-setup)
+  //   called automatically when collection is used
+  //   if you have to re-setup, call resetSetup() first
+  //   see also: setCollection(), setCollectionName(), getCollection()
   Throttle.setup = function() {
-    if (this.isSetup) {
+    if (this.isSetup && this._collection) {
       return;
     }
     this.isSetup = true;
-    if (this._collectionName) {
-      this._collection = new Meteor.Collection(this._collectionName);
-      this._collection._ensureIndex({key: 1});
-      this._collection._ensureIndex({expire: 1});
-    } else {
-      this._collection = new Meteor.Collection(null);
+    if (!this._collectionName) {
+      // no collectionName = no mongo, RAM only
+      //   NOTE this is actually pretty slow because it is non-indexed
+      this._collection = new Mongo.Collection(null, this._collectionOptions);
+      return;
     }
+    // MongoDB collection
+    //   want something else, or more configuration options?
+    //   no problem... see Throttle.setCollection()
+    //   and use it before anything else uses Throttle.
+    this._collection = new Mongo.Collection(
+      this._collectionName,
+      this._collectionOptions
+    );
+    this._collection._ensureIndex({key: 1});
+    this._collection._ensureIndex({expire: 1});
   };
 
   // clear existing setup (allowing for changing _collectionName)
   Throttle.resetSetup = function() {
     this.isSetup = false;
-  }
+  };
+
+  // Access to get the Throttle._collection object - it's a Meteor.Collection()
+  //   see setup(), setCollection()
+  Throttle.getCollection = function() {
+    this.setup();
+    return this._collection;
+  };
 
   // Access to set the Throttle._collectionName string
-  //   see setup()
-  Throttle.setCollection = function(name) {
+  //   see setup(), resetSetup(), setCollectionName(), getCollection()
+  Throttle.setCollection = function(input) {
+    if (typeof input === "string" || typeof input === "null") {
+      // assume this is _collectionName setting
+      return this.setCollectionName(input);
+    }
+    // assume this is _collection (the full collection object)
+    if (this.debug) {
+      console.log('Throttle.setCollection([object]) new collection set');
+    }
+    this._collection = input;
+    this.isSetup = true;
+  };
+
+  // Access to set the Throttle._collectionName string
+  //   see setup(), resetSetup(), setCollection(), getCollection()
+  Throttle.setCollectionName = function(name) {
     check(name, Match.OneOf(String, null));
     this._collectionName = name;
-    if (this.debug) {
-      console.log('Throttle.setCollection(' + name + ')');
-    }
+    console.log('*** Throttle DEPRECATION NOTICE ***');
+    console.log('  Throttle.setCollectionName(' + name + ') reset called after');
+    console.log('    Future versions of Throttle will omit setCollectionName()');
+    console.log('    If you want to customize the collection, instead use setCollection()');
+    console.log('    Or you can manually set the Throttle._collectionName before setup, on server');
+    console.log('^^^ Throttle DEPRECATION NOTICE ^^^');
     // reset setup() just in case it's already been called
     this.resetSetup();
-  }
+  };
 
   // Access to set the Throttle.debug Boolean
   Throttle.setDebugMode = function(bool) {
@@ -65,7 +108,7 @@ if (Meteor.isServer) {
     if (this.debug) {
       console.log('Throttle.setDebugMode(' + bool + ')');
     }
-  }
+  };
 
   // Access to set the Throttle.debug Boolean
   //   see keyScope()
@@ -75,7 +118,7 @@ if (Meteor.isServer) {
     if (this.debug) {
       console.log('Throttle.setScope(' + scope + ')');
     }
-  }
+  };
 
   // Access to set the Throttle.isMethodhelpersAllowed Boolean
   //   see checkAllowedMethods()
@@ -85,7 +128,7 @@ if (Meteor.isServer) {
     if (this.debug) {
       console.log('Throttle.setMethodsAllowed(' + bool + ')');
     }
-  }
+  };
 
   // Modify the key based on Throttle.scope
   Throttle.keyScope = function(key) {
@@ -101,7 +144,7 @@ if (Meteor.isServer) {
       }
     }
     return key;
-  }
+  };
 
   // check to see if we've done something too many times
   // if we "pass" then go ahead and set... (shortcut)
@@ -125,7 +168,7 @@ if (Meteor.isServer) {
       console.log('Throttle.check(', key, allowed, ')');
     }
     return (this._collection.find({ key: key }).count() < allowed);
-  }
+  };
 
   // create a record with
   Throttle.set = function(key, expireInMS) {
@@ -155,7 +198,7 @@ if (Meteor.isServer) {
   Throttle.epoch = function() {
     var now = new Date;
     return now.getTime();
-  }
+  };
 
   // Rise exception if disabled client-side methods
   //   see setMethodsAllowed()
