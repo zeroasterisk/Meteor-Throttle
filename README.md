@@ -38,14 +38,20 @@ This is optional Configuration - if you want to change how Throttle operates.
       // core Throttle config
       // ----------------------------
 
-      // Set a MongoDB collection name
+      // Set a MongoDB collection: name, options, or Collection
       //   you can set this to your own 'throttle_collection_name' if you need to
-      //   for a multi-node app you MUST use MongoDB
-      //   for a single-node app you may wan to set null, NodeJS RAM only (no MongoDB)
-      //     but be aware it's NOT faster than MongoDB, unless MongoDB is bottlenecked
+      //   for a multi-node app you MUST use MongoDB (or other shared DB)
+      //   for a single-node app you may want to set null, NodeJS RAM only (no MongoDB)
+      //     but for some workloads it may NOT be faster than MongoDB, because it is not indexed
+      //       You will have to profile for yourself to see which is faster...
       //     https://github.com/zeroasterisk/Meteor-Throttle/pull/10 (see profiling, thanks @osv)
-      Throttle.setCollection("my_throts"); // default = 'throttles'
-      //Throttle.setCollection(null);      // not for multi-node apps, not faster in general
+      //   Want more customization?  see: setCollection()
+      Throttle.setCollectionName("my_throts"); // default = 'throttles'
+      // Throttle.setCollectionName(null);     // RAM only, no DB, not for multi-node apps
+      // Throttle.setCollection(new Mongo.Collection("customForWhat")); // full control over Collection
+      // Throttle.setup();                     // verify Collection is set up (automatic, no need to manually call)
+      // Throttle.resetSetup();                // if you need to change collection after setup()
+      // Throttle.getCollection()._createCappedCollection(numBytes); // access to already setup Collection
 
       // Set the "scope" to "user specific" so every key gets appended w/ userId
       Throttle.setScope("user");          // default = global
@@ -99,7 +105,9 @@ and over again, even if a user triggered it.
 * `check(key, allowedCount)` checks a key, if less than `allowedCount` of the (unexpired) records exist, it passes
 * `set(key, expireInMS)` sets a record for key, and it will expire after `expireInMS` milliseconds, eg: `60000` = 1 min in the future
 * `purge()` expires all records which are no longer within timeframe (automatically called on every check)
-* `setCollection(mixed)` null for no MongoDB, string for MongoDB collection name ['throttles' by default]
+* `setCollectionName(mixed)` null for no MongoDB, string for MongoDB collection name ['throttles' by default]
+* `setCollection(new Mongo.Collection('abc', {}))` set anything you want for the collection
+* `getCollection()` returns the collection (after setup) for manipulation
 * `setScope(bool)` true/false logs details [false by default]
 * `setMethodsAllowed(bool)` true/false allows clientside helper methods [true by default]
 * `setDebugMode(bool)` true/false logs details [false by default]
