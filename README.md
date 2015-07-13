@@ -40,12 +40,14 @@ This is optional Configuration - if you want to change how Throttle operates.
 
       // Set a MongoDB collection: name, options, or Collection
       //   you can set this to your own 'throttle_collection_name' if you need to
-      //   for a multi-node app you MUST use MongoDB
-      //   for a single-node app you may wan to set null, NodeJS RAM only (no MongoDB)
-      //     but be aware it's NOT faster than MongoDB, unless MongoDB is bottlenecked
+      //   for a multi-node app you MUST use MongoDB (or other shared DB)
+      //   for a single-node app you may want to set null, NodeJS RAM only (no MongoDB)
+      //     but for some workloads it may NOT be faster than MongoDB, because it is not indexed
+      //       You will have to profile for yourself to see which is faster...
       //     https://github.com/zeroasterisk/Meteor-Throttle/pull/10 (see profiling, thanks @osv)
+      //   Want more customization?  see: setCollection()
       Throttle.setCollectionName("my_throts"); // default = 'throttles'
-      // Throttle.setCollectionName(null);     // not for multi-node apps, not faster in general
+      // Throttle.setCollectionName(null);     // RAM only, no DB, not for multi-node apps
       // Throttle.setCollection(new Mongo.Collection("customForWhat")); // full control over Collection
       // Throttle.setup();                     // verify Collection is set up (automatic, no need to manually call)
       // Throttle.resetSetup();                // if you need to change collection after setup()

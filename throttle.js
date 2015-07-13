@@ -14,7 +14,9 @@ if (Meteor.isServer) {
   Throttle = {};
 
   // CONFIG
-  // collection name (null for single-node-app, RAM only, no MongoDB)
+  // collection name
+  //   You can set to null for single-node-app, RAM only, no MongoDB
+  //   Want more customization?  see: setCollection()
   Throttle._collectionName = 'throttles';
   // collection options
   Throttle._collectionOptions = {};
@@ -43,7 +45,9 @@ if (Meteor.isServer) {
     this.isSetup = true;
     if (!this._collectionName) {
       // no collectionName = no mongo, RAM only
-      //   NOTE this is actually pretty slow because it is non-indexed
+      //   NOTE that null (RAM ONLY) will not work on a multi-app setup
+      //   Also note that this may not be faster because it is non-indexed
+      //     (depending on your usage)
       this._collection = new Mongo.Collection(null, this._collectionOptions);
       return;
     }
@@ -61,6 +65,8 @@ if (Meteor.isServer) {
 
   // clear existing setup (allowing for changing _collectionName)
   Throttle.resetSetup = function() {
+    delete Throttle._collection;
+    Throttle._collection = null;
     this.isSetup = false;
   };
 
