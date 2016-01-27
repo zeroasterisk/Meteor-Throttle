@@ -228,7 +228,15 @@ if (Meteor.isServer) {
       Throttle.checkAllowedMethods();
       check(key, String);
       check(expireInMS, Match.Integer);
+      throw new Meteor.Error(403, 'Client-side throttle-set disabled as insecure');
+      /*
+       * Disabled as insecure
+       *   if you want this functionality, create your own method
+       *   (which is more secure anyway)
+       * https://github.com/zeroasterisk/Meteor-Throttle/issues/13
+       *
       return Throttle.set(key, expireInMS);
+      */
     },
     'throttle-check': function(key, allowed) {
       Throttle.checkAllowedMethods();
