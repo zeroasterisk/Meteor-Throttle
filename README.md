@@ -114,7 +114,7 @@ and over again, even if a user triggered it.
 * `resetSetup()` re-setup the Collection, if needed (automatic if `setCollection()` is used)
 
 
-## Meteor Methods (call-able)
+## Meteor Methods (client side call-able)
 
 * `throttle(key, allowedCount, expireInMS)` --> `Throttle.checkThenSet()`
 * `throttle-check(key, allowedCount)` --> `Throttle.check()`
@@ -131,6 +131,22 @@ if (Meteor.isServer) {
 }
 ```
 
+NOTE: some of the Throttle API is not available via methods
+
 * _NO `throttle-set` method, insecure_
 * _NO `throttle-set-scope` method, insecure_
+
+## Alternatives via Underscore
+
+Are you simply trying to rate limit a simple function to prevent flooding, in
+a single process/session?  If so, take a look at Underscore's functions, which
+you already have available thanks to Meteor:
+
+* [`_.throttle`](http://underscorejs.org/#throttle)
+* [`_.debounce`](http://underscorejs.org/#debounce)
+
+These functions only limit the execution of a function, and are not shared
+across multiple application instances, but are useful options none-the-less,
+and much faster if you're only goal is _simple_ rate limiting.
+
 
