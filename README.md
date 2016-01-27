@@ -114,14 +114,16 @@ and over again, even if a user triggered it.
 * `resetSetup()` re-setup the Collection, if needed (automatic if `setCollection()` is used)
 
 
-## Methods Methods (call-able)
+## Meteor Methods (call-able)
 
 * `throttle(key, allowedCount, expireInMS)` --> `Throttle.checkThenSet()`
 * `throttle-check(key, allowedCount)` --> `Throttle.check()`
-* `throttle-set(key, expireInMS)` --> `Throttle.set()`
 * `throttle-debug(bool)` --> pass in true/false to toggle server loggin on checks
+* DEPRECATED: `throttle-set(key, expireInMS)` has been disabled due to **insecurity**
+ * it would be too easy to set `expireInMS=1` bypassing validation
+ * the method is still defined to inform anyone who is using it (legacy support)
 
-If you don't planning to use methods, better if you disable it:
+If you don't planning to use methods, better if you disable them:
 
 ```js
 if (Meteor.isServer) {
@@ -129,5 +131,6 @@ if (Meteor.isServer) {
 }
 ```
 
-*(no set-scope method, because that would be insecure)*
+* _NO `throttle-set` method, insecure_
+* _NO `throttle-set-scope` method, insecure_
 
