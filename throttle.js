@@ -80,7 +80,7 @@ if (Meteor.isServer) {
   // Access to set the Throttle._collectionName string
   //   see setup(), resetSetup(), setCollectionName(), getCollection()
   Throttle.setCollection = function(input) {
-    if (typeof input === "string" || typeof input === "null") {
+    if (typeof input === "string" || input === null) {
       // assume this is _collectionName setting
       return this.setCollectionName(input);
     }
