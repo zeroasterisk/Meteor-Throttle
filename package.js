@@ -2,7 +2,7 @@
 Package.describe({
   name: "zeroasterisk:throttle",
   summary: "A secure means of rate limiting, debounce even in a cluster (emails, etc)",
-  version: "0.3.3",
+  version: "0.3.4",
   git: "https://github.com/zeroasterisk/Meteor-Throttle.git"
 });
 
